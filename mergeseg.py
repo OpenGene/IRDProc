@@ -12,34 +12,30 @@ def getSegmentNo(title):
 	return int(numchar)
 
 def getStrainName(title):
-	pos =  title.find("Segment")
-	if pos <= 1:
+	segpos =  title.find("Segment")
+	if segpos <= 1:
 		return "Bad format"
-	return title[:pos-1]
+	start =  title.find("|")
+	return title[start+1:segpos-1]
 
 def mergeSegment(infilename, outfilename):
 	curStrain  = ""
-	curSeq = ""
-	curSeg = 10000
 	outfile = open(outfilename, "w")
 	genome =  0
 	with open(infilename, "r") as infile:
 		for line in infile.readlines():
 			if line.startswith(">"):
-				seg = getSegmentNo(line)
-				if seg < 0:
-					break
-				if seg < curSeg:
+				strain = getStrainName(line)
+				if strain != curStrain:
 					# a new strain
-					strain = getStrainName(line)
-					outfile.write(strain + "\n")
+					outfile.write(">" + strain + "\n")
 					genome += 1
 					print(str(genome) + ": " + strain)
 				else:
 					# still the same strain: pad it with 32 N
 					outfile.write("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN" + "\n")
 				# set it as current segment
-				curSeg = seg
+				curStrain = strain
 			else:
 				if line != "\n":
 					outfile.write(line)
